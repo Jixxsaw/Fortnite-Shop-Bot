@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 from PIL import Image
 from io import BytesIO
+from keep_alive import app
 import datetime
 import pytz
 from flask import Flask
