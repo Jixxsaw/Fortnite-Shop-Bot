@@ -1,6 +1,7 @@
 import os
 import aiohttp
 import discord
+from keep_alive import keep_alive
 from discord import Embed
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
