@@ -144,13 +144,11 @@ async def send_shop_items(channel, items):
         start = end
 
 # Täglicher Task
-@tasks.loop(hours=24)
+@tasks.loop(minutes=1)
 async def scheduled_shop_post():
-    # Zeitzonenanpassung auf Berlin (CEST / CET)
     tz = pytz.timezone('Europe/Berlin')
     now = datetime.datetime.now(tz)
-    # Sicherstellen, dass der Task genau um 2:10 Uhr läuft
-    if now.hour == 2 and now.minute == 10:
+    if now.hour == 2 and now.minute == 30:  # Uhrzeit geändert auf 2:30 Uhr
         channel = bot.get_channel(CHANNEL_ID)
         if channel:
             items = await fetch_shop_data()
@@ -175,7 +173,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Bot läuft!"  # Gibt eine einfache Antwort zurück
+    return "Bot läuft!"
 
 # Flask-Server in einem separaten Thread starten
 def run():
@@ -183,9 +181,6 @@ def run():
 
 # Bot ausführen
 if __name__ == "__main__":
-    # Starte den Flask-Server im Hintergrund
-    t1 = Thread(target=run)  # Flask-Server
+    t1 = Thread(target=run)
     t1.start()
-
-    # Starte den Discord-Bot
     bot.run(TOKEN)
