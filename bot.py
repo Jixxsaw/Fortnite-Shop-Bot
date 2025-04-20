@@ -148,7 +148,7 @@ async def send_shop_items(channel, items):
 async def scheduled_shop_post():
     tz = pytz.timezone('Europe/Berlin')
     now = datetime.datetime.now(tz)
-    if now.hour == 2 and now.minute >= 30:  # Uhrzeit geändert auf 2:30 oder später
+    if now.hour == 3 and now.minute >= 01:  # Uhrzeit geändert auf 2:01 oder später
         channel = bot.get_channel(CHANNEL_ID)
         if channel:
             items = await fetch_shop_data()
