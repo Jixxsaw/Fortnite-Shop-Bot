@@ -44,6 +44,11 @@ fixedPrices = {
     "3600 V-Bucks": "25 €",
 }
 
+@bot.event
+async def on_command_error(ctx, error):
+    await ctx.send(f"❌ Fehler: {error}")
+    print(f"[Fehler] {error}")
+
 # Shopdaten abrufen
 async def fetch_shop_data():
     url = 'https://fnitemshop.com/'
