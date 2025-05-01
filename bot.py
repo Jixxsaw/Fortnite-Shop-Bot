@@ -68,43 +68,28 @@ async def ping(ctx):
 
 # Shopdaten abrufen
 async def fetch_shop_data():
-    url = 'https://www.fortnite.com/item-shop?lang=de'
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate',  # Gzip und Deflate statt Brotli
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',  # Zusätzlicher Header für die Anfrage
-        'Cache-Control': 'max-age=0',  # Verhindert das Caching der Anfrage
-    }
+    url = 'https://fnitemshop.com/'
+    headers = {'User-Agent': 'Mozilla/5.0'}
 
     async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(url, headers=headers) as response:
-                if response.status != 200:
-                    print(f"Fehler beim Laden der Seite: {response.status}")
-                    logging.error(f"Fehler beim Laden der Seite: {response.status}")
-                    return []
-                
-                logging.info(f"Seite erfolgreich geladen: {url}")
-                html = await response.text()
-                soup = BeautifulSoup(html, 'html.parser')
-                items = []
+        async with session.get(url, headers=headers) as response:
+            if response.status != 200:
+                print(f"Fehler beim Laden der Seite: {response.status}")
+                return []
 
-                for img in soup.find_all('img', {'src': lambda x: x and x.startswith('https://fnitemshop.com/wp-content/uploads')}):
-                    imageUrl = img['src']
-                    parent = img.find_parent('div', class_='product')
-                    name = parent.find('div', class_='product-title').text.strip() if parent else 'Unbekannt'
-                    price = parent.find('div', class_='product-price').text.strip() if parent else 'Unbekannt'
-                    items.append({'imageUrl': imageUrl, 'name': name, 'price': price})
+            html = await response.text()
+            soup = BeautifulSoup(html, 'html.parser')
+            items = []
 
-                logging.info(f"{len(items)} Items geladen")
-                return items
-        except Exception as e:
-            print(f"Fehler beim Abrufen der Seite: {e}")
-            logging.error(f"Fehler beim Abrufen der Seite: {e}")
-            return []
+            for img in soup.find_all('img', {'src': lambda x: x and x.startswith('https://fnitemshop.com/wp-content/uploads')}):
+                imageUrl = img['src']
+                parent = img.find_parent('div', class_='product')
+                name = parent.find('div', class_='product-title').text.strip() if parent else 'Unbekannt'
+                price = parent.find('div', class_='product-price').text.strip() if parent else 'Unbekannt'
+                items.append({'imageUrl': imageUrl, 'name': name, 'price': price})
 
+            print(f"{len(items)} Items geladen")
+            return items
 
 # Preisliste erstellen
 def create_price_text_file():
