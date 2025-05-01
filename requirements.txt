@@ -6,3 +6,4 @@ beautifulsoup4
 pillow
 pytz
 gunicorn
+brotli
