@@ -81,6 +81,10 @@ async def fetch_shop_data():
             soup = BeautifulSoup(html, 'html.parser')
             items = []
 
+            # Debug: Anzahl der Bilder loggen
+            all_imgs = soup.find_all('img')
+            print(f"🔍 Gefundene <img>-Tags insgesamt: {len(all_imgs)}")
+
             for img in soup.find_all('img', {'src': lambda x: x and x.startswith('https://fnitemshop.com/wp-content/uploads')}):
                 imageUrl = img['src']
                 parent = img.find_parent('div', class_='product')
@@ -219,5 +223,3 @@ if __name__ == "__main__":
     t1 = Thread(target=run)
     t1.start()
     bot.run(TOKEN)
-
-
