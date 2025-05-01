@@ -182,12 +182,19 @@ async def scheduled_shop_post():
         else:
             logging.warning("Channel nicht gefunden")
 
+# Shop-Befehl per Hand
 @bot.command()
 async def shop(ctx):
     channel = bot.get_channel(CHANNEL_ID)
+    if not channel:
+        await ctx.send("❌ Channel nicht gefunden.")
+        return
     items = await fetch_shop_data()
     if items:
         await send_shop_items(channel, items)
+        await ctx.send("✅ Shop wurde gepostet!")
+    else:
+        await ctx.send("❌ Keine Shopdaten gefunden.")
 
 @bot.event
 async def on_ready():
@@ -212,4 +219,5 @@ if __name__ == "__main__":
     t1 = Thread(target=run)
     t1.start()
     bot.run(TOKEN)
+
 
