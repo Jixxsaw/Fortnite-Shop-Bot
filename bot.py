@@ -24,6 +24,10 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# Logging aktivieren
+import logging
+logging.basicConfig(level=logging.INFO)
+
 # V-Bucks Preise
 fixedPrices = {
     "500 V-Bucks": "3 €",
@@ -48,6 +52,19 @@ fixedPrices = {
 async def on_command_error(ctx, error):
     await ctx.send(f"❌ Fehler: {error}")
     print(f"[Fehler] {error}")
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+    logging.info(f"Befehl empfangen: {message.content} von {message.author}")
+    await bot.process_commands(message)
+
+@bot.command()
+async def ping(ctx):
+    """Antwortet mit der Latenzzeit des Bots"""
+    latency = round(bot.latency * 1000)
+    await ctx.send(f"🏓 Pong! Latenz: {latency}ms")
 
 # Shopdaten abrufen
 async def fetch_shop_data():
@@ -153,14 +170,18 @@ async def send_shop_items(channel, items):
 async def scheduled_shop_post():
     tz = pytz.timezone('Europe/Berlin')
     now = datetime.datetime.now(tz)
-    if now.hour == 3 and now.minute >= 1:  # Uhrzeit geändert auf 2:1 oder später
+    if now.hour == 3 and now.minute >= 1:
+        logging.info("[Task] Zeit erreicht, versuche Shop zu posten")
         channel = bot.get_channel(CHANNEL_ID)
         if channel:
             items = await fetch_shop_data()
             if items:
                 await send_shop_items(channel, items)
+            else:
+                logging.warning("Keine Items gefunden")
+        else:
+            logging.warning("Channel nicht gefunden")
 
-# Shop-Befehl
 @bot.command()
 async def shop(ctx):
     channel = bot.get_channel(CHANNEL_ID)
@@ -168,17 +189,19 @@ async def shop(ctx):
     if items:
         await send_shop_items(channel, items)
 
-# Bot-Start
 @bot.event
 async def on_ready():
-    print(f"Bot gestartet als {bot.user}")
+    print(f"✅ Bot gestartet als {bot.user}")
+    if not scheduled_shop_post.is_running():
+        scheduled_shop_post.start()
+    logging.info("Scheduled Task gestartet")
 
 # Flask Setup für Uptime Robot Ping
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Bot läuft!"
+    return "✅ Bot läuft – Cold Start möglich bei Inaktivität!"
 
 # Flask-Server in einem separaten Thread starten
 def run():
@@ -189,3 +212,4 @@ if __name__ == "__main__":
     t1 = Thread(target=run)
     t1.start()
     bot.run(TOKEN)
+
