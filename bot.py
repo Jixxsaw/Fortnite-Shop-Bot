@@ -75,15 +75,13 @@ async def fetch_shop_data():
         async with session.get(url, headers=headers) as response:
             if response.status != 200:
                 print(f"Fehler beim Laden der Seite: {response.status}")
+                logging.error(f"Fehler beim Laden der Seite: {response.status}")
                 return []
 
+            logging.info(f"Seite erfolgreich geladen: {url}")
             html = await response.text()
             soup = BeautifulSoup(html, 'html.parser')
             items = []
-
-            # Debug: Anzahl der Bilder loggen
-            all_imgs = soup.find_all('img')
-            print(f"🔍 Gefundene <img>-Tags insgesamt: {len(all_imgs)}")
 
             for img in soup.find_all('img', {'src': lambda x: x and x.startswith('https://fnitemshop.com/wp-content/uploads')}):
                 imageUrl = img['src']
@@ -92,8 +90,9 @@ async def fetch_shop_data():
                 price = parent.find('div', class_='product-price').text.strip() if parent else 'Unbekannt'
                 items.append({'imageUrl': imageUrl, 'name': name, 'price': price})
 
-            print(f"{len(items)} Items geladen")
+            logging.info(f"{len(items)} Items geladen")
             return items
+
 
 # Preisliste erstellen
 def create_price_text_file():
